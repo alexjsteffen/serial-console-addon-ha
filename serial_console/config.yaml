@@ -1,5 +1,5 @@
 name: Serial Console
-version: "1.0.0"
+version: "1.1.0"
 slug: serial_console
 description: Authenticated browser access to a server serial console using ser2net and ttyd
 arch:
@@ -36,6 +36,14 @@ options:
   username: console
   password: ""
   max_clients: 1
+  ttyd_title: Server serial console
+  ttyd_terminal_type: xterm-256color
+  ttyd_renderer_type: webgl
+  ttyd_font_size: 0
+  ttyd_cursor_style: block
+  ttyd_theme: default
+  ttyd_leave_alert: true
+  ttyd_resize_overlay: true
   raw_tcp: false
   ssl: false
   certfile: fullchain.pem
@@ -50,6 +58,14 @@ schema:
   username: str
   password: password
   max_clients: int(1,8)
+  ttyd_title: str
+  ttyd_terminal_type: str
+  ttyd_renderer_type: list(webgl|canvas|dom)
+  ttyd_font_size: int(0,32)
+  ttyd_cursor_style: list(block|underline|bar)
+  ttyd_theme: list(default|light|green|amber|high-contrast)
+  ttyd_leave_alert: bool
+  ttyd_resize_overlay: bool
   raw_tcp: bool
   ssl: bool
   certfile: str

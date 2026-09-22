@@ -14,6 +14,8 @@ Server console <-> USB serial adapter <-> ser2net <-> socat <-> ttyd <-> browser
 Only ser2net opens the serial device. ttyd runs a fixed TCP client, not a shell.
 The service starts before Home Assistant Core and does not depend on Core's API.
 It still depends on the Pi, HAOS/Supervisor, power, and network being available.
+This repository was vibe coded, then tightened with explicit validation, docs,
+and PTY-backed integration tests.
 
 ## Install locally on your Pi 4
 
@@ -47,7 +49,8 @@ is needed. UART access maps serial devices into the container; the selected devi
 must not simultaneously be used by another add-on/integration.
 
 See [configuration and operations](serial_console/DOCS.md) for TLS, SSH tunnelling,
-optional raw TCP, troubleshooting, and every option.
+optional raw TCP, ttyd presentation/design options, troubleshooting, and every
+option.
 
 ## Architectures
 
