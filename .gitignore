@@ -1,0 +1,7 @@
+__pycache__/
+*.py[cod]
+.venv/
+options.json
+*.key
+*.pem
+test-results/

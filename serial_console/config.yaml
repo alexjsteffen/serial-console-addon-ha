@@ -1,0 +1,56 @@
+name: Serial Console
+version: "1.0.0"
+slug: serial_console
+description: Authenticated browser access to a server serial console using ser2net and ttyd
+arch:
+  - aarch64
+  - armv7
+  - amd64
+startup: services
+boot: auto
+init: false
+uart: true
+udev: true
+apparmor: true
+host_network: false
+ingress: false
+webui: "[PROTO:ssl]://[HOST]:[PORT:7681]/"
+watchdog: "tcp://[HOST]:[PORT:7681]"
+timeout: 15
+map:
+  - type: ssl
+    read_only: true
+ports:
+  7681/tcp: 7681
+  2000/tcp: null
+ports_description:
+  7681/tcp: Authenticated ttyd browser terminal (use TLS or a trusted VPN)
+  2000/tcp: Optional unauthenticated raw serial TCP (disabled by default)
+options:
+  device: /dev/ttyUSB0
+  baud: 115200
+  data_bits: 8
+  parity: none
+  stop_bits: 1
+  flow_control: none
+  username: console
+  password: ""
+  max_clients: 1
+  raw_tcp: false
+  ssl: false
+  certfile: fullchain.pem
+  keyfile: privkey.pem
+schema:
+  device: device(subsystem=tty)
+  baud: int(50,4000000)
+  data_bits: int(5,8)
+  parity: list(none|even|odd)
+  stop_bits: int(1,2)
+  flow_control: list(none|hardware|software)
+  username: str
+  password: password
+  max_clients: int(1,8)
+  raw_tcp: bool
+  ssl: bool
+  certfile: str
+  keyfile: str
