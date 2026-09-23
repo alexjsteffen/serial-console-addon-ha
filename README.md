@@ -37,7 +37,8 @@ and PTY-backed integration tests.
    unique password of 12–128 printable ASCII characters. There is deliberately
    no usable default password: startup fails until you supply one.
 5. Keep `raw_tcp: false` and the Network mapping for port 2000 blank. Save and
-   start. Inspect **Logs**, then choose **Open Web UI**, or open
+   start. Inspect **Logs**, then choose **Open Web UI** (or pin it to the HA
+   sidebar from the app's Info tab), or open
    `http://HOME_ASSISTANT_IP:7681/`. Log in as `console` with your configured password.
    Press Enter once to request the server's login prompt.
 6. Enable **Start on boot** and **Watchdog** on the app's Info tab. For normal
