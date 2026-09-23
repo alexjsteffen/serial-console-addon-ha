@@ -1,5 +1,5 @@
 name: Serial Console
-version: "1.1.0"
+version: "1.1.1"
 slug: serial_console
 description: Authenticated browser access to a server serial console using ser2net and ttyd
 arch:
@@ -13,7 +13,10 @@ uart: true
 udev: true
 apparmor: true
 host_network: false
-ingress: false
+ingress: true
+ingress_port: 7681
+panel_icon: mdi:console
+panel_title: Serial Console
 webui: "[PROTO:ssl]://[HOST]:[PORT:7681]/"
 watchdog: "tcp://[HOST]:[PORT:7681]"
 timeout: 15

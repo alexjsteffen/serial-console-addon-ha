@@ -82,8 +82,9 @@ Private keys can remain readable only by root: ttyd loads TLS before dropping
 to UID/GID 65534. The `/ssl` mount is read-only.
 
 The username/password prompt authenticates access to ttyd. Your server's own
-console login is separate. This is direct browser access, not HA Ingress, so
-an already logged-in Home Assistant browser still needs the ttyd credentials.
+console login is separate. Home Assistant Ingress is enabled, including optional
+sidebar pinning, but ttyd authentication is still required and independent from
+an existing Home Assistant login.
 Native TLS is optional to support existing VPN and SSH-tunnel deployments;
 plain HTTP exposes credentials and console contents to network observers.
 Use TLS or a trusted encrypted tunnel and do not forward these ports publicly.
