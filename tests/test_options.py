@@ -51,7 +51,9 @@ class OptionsTests(unittest.TestCase):
         for change in ({"baud": True}, {"raw_tcp": "false"}, {"max_clients": 0},
                        {"data_bits": 9}, {"parity": "mark"}, {"baud": 12345},
                        {"username": "a:b"}, {"password": "x" * 12 + "\n"},
-                       {"certfile": "../secret"}, {"extra": 1}):
+                       {"certfile": "../secret"}, {"ttyd_title": "bad\ntitle"},
+                       {"ttyd_terminal_type": "xterm 256color"}, {"ttyd_font_size": 7},
+                       {"ttyd_theme": "neon"}, {"extra": 1}):
             with self.subTest(change=change), self.assertRaises(ValueError):
                 self.options(**change)
 
@@ -66,6 +68,22 @@ class OptionsTests(unittest.TestCase):
         opts = self.options(raw_tcp=True, ssl=True, max_clients=3)
         self.assertIn("tcp,0.0.0.0,2000", app.render_ser2net(opts))
         self.assertIn("--ssl", app.ttyd_command(opts))
+
+    def test_ttyd_options_are_rendered_safely(self):
+        opts = self.options(ttyd_title="Rack A console", ttyd_terminal_type="vt220",
+                            ttyd_renderer_type="canvas", ttyd_font_size=18,
+                            ttyd_cursor_style="underline", ttyd_theme="amber",
+                            ttyd_leave_alert=False, ttyd_resize_overlay=False)
+        cmd = app.ttyd_command(opts)
+        self.assertIn("--terminal-type", cmd)
+        self.assertIn("vt220", cmd)
+        self.assertIn("titleFixed=Rack A console", cmd)
+        self.assertIn("rendererType=canvas", cmd)
+        self.assertIn("fontSize=18", cmd)
+        self.assertIn("cursorStyle=underline", cmd)
+        self.assertIn("disableLeaveAlert=true", cmd)
+        self.assertIn("disableResizeOverlay=true", cmd)
+        self.assertTrue(any(part.startswith('theme={"background":"#1f1300"') for part in cmd))
 
 
 if __name__ == "__main__":

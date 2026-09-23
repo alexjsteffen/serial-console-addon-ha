@@ -19,6 +19,14 @@ DEFAULTS = {
     "device": "/dev/ttyUSB0", "baud": 115200, "data_bits": 8,
     "parity": "none", "stop_bits": 1, "flow_control": "none",
     "username": "console", "password": "", "max_clients": 1,
+    "ttyd_title": "Server serial console",
+    "ttyd_terminal_type": "xterm-256color",
+    "ttyd_renderer_type": "webgl",
+    "ttyd_font_size": 0,
+    "ttyd_cursor_style": "block",
+    "ttyd_theme": "default",
+    "ttyd_leave_alert": True,
+    "ttyd_resize_overlay": True,
     "raw_tcp": False, "ssl": False,
     "certfile": "fullchain.pem", "keyfile": "privkey.pem",
 }
@@ -27,6 +35,24 @@ BAUDS = {50, 75, 110, 134, 150, 200, 300, 600, 1200, 1800, 2400,
          4800, 9600, 19200, 38400, 57600, 115200, 230400, 460800,
          500000, 576000, 921600, 1000000, 1152000, 1500000, 2000000,
          2500000, 3000000, 3500000, 4000000}
+THEME_PRESETS = {
+    "light": {
+        "background": "#f7fafc", "foreground": "#1a202c",
+        "cursor": "#2d3748", "selectionBackground": "#cbd5e0",
+    },
+    "green": {
+        "background": "#001b00", "foreground": "#5cff5c",
+        "cursor": "#8cff8c", "selectionBackground": "#1f441f",
+    },
+    "amber": {
+        "background": "#1f1300", "foreground": "#ffbf66",
+        "cursor": "#ffd699", "selectionBackground": "#5c3b00",
+    },
+    "high-contrast": {
+        "background": "#000000", "foreground": "#ffffff",
+        "cursor": "#ffffff", "selectionBackground": "#4a5568",
+    },
+}
 
 
 def validate(data):
@@ -60,6 +86,18 @@ def validate(data):
         raise ValueError("Set password to 12-128 printable ASCII characters before starting")
     if not 1 <= opts["max_clients"] <= 8:
         raise ValueError("max_clients must be between 1 and 8")
+    if not 1 <= len(opts["ttyd_title"]) <= 80 or any(not 32 <= ord(c) <= 126 for c in opts["ttyd_title"]):
+        raise ValueError("ttyd_title must contain 1-80 printable ASCII characters")
+    if not re.fullmatch(r"[A-Za-z0-9+_.-]{1,32}", opts["ttyd_terminal_type"]):
+        raise ValueError("ttyd_terminal_type must contain only letters, digits, +, _, . or -")
+    if opts["ttyd_renderer_type"] not in ("webgl", "canvas", "dom"):
+        raise ValueError("ttyd_renderer_type must be webgl, canvas or dom")
+    if opts["ttyd_font_size"] not in (0, *range(8, 33)):
+        raise ValueError("ttyd_font_size must be 0 or between 8 and 32")
+    if opts["ttyd_cursor_style"] not in ("block", "underline", "bar"):
+        raise ValueError("ttyd_cursor_style must be block, underline or bar")
+    if opts["ttyd_theme"] != "default" and opts["ttyd_theme"] not in THEME_PRESETS:
+        raise ValueError(f"ttyd_theme must be default or one of: {', '.join(THEME_PRESETS)}")
     for key in ("certfile", "keyfile"):
         if not re.fullmatch(r"[A-Za-z0-9_-][A-Za-z0-9_.-]*", opts[key]):
             raise ValueError(f"{key} must be a filename directly inside /ssl")
@@ -93,15 +131,27 @@ def render_ser2net(opts):
 def ttyd_command(opts):
     # No shell, no URL-provided arguments, and no command configurable by clients.
     # ttyd drops privileges before executing its fixed TCP terminal client.
+    theme = THEME_PRESETS.get(opts["ttyd_theme"])
     cmd = ["ttyd", "--port", "7681", "--interface", "0.0.0.0",
            "--credential", f'{opts["username"]}:{opts["password"]}',
            "--check-origin", "--writable", "--max-clients", str(opts["max_clients"]),
            "--uid", "65534", "--gid", "65534", "--debug", "3",
-           "--client-option", "titleFixed=Server serial console",
+           "--terminal-type", opts["ttyd_terminal_type"],
+           "--client-option", f'titleFixed={opts["ttyd_title"]}',
+           "--client-option", f'rendererType={opts["ttyd_renderer_type"]}',
+           "--client-option", f'cursorStyle={opts["ttyd_cursor_style"]}',
            "--client-option", "disableReconnect=true"]
+    if opts["ttyd_font_size"]:
+        cmd += ["--client-option", f'fontSize={opts["ttyd_font_size"]}']
+    if not opts["ttyd_leave_alert"]:
+        cmd += ["--client-option", "disableLeaveAlert=true"]
+    if not opts["ttyd_resize_overlay"]:
+        cmd += ["--client-option", "disableResizeOverlay=true"]
+    if theme:
+        cmd += ["--client-option", f'theme={json.dumps(theme, separators=(",", ":"))}']
     if opts["ssl"]:
         cmd += ["--ssl", "--ssl-cert", f'/ssl/{opts["certfile"]}',
-                "--ssl-key", f'/ssl/{opts["keyfile"]}']
+               "--ssl-key", f'/ssl/{opts["keyfile"]}']
     return cmd + ["socat", "STDIO,rawer,escape=0x1d", "TCP:127.0.0.1:2000,nodelay"]
 
 

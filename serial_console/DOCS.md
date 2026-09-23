@@ -13,6 +13,14 @@
 | `username` | `console` | 1–64 letters, digits, dot, underscore, or hyphen |
 | `password` | empty | Required: 12–128 printable ASCII characters; spaces and punctuation allowed |
 | `max_clients` | `1` | 1–8 simultaneous serial clients in total; browser limit is also set to this value |
+| `ttyd_title` | `Server serial console` | Fixed browser title shown by ttyd; 1–80 printable ASCII characters |
+| `ttyd_terminal_type` | `xterm-256color` | TERM value reported through ttyd to the browser session |
+| `ttyd_renderer_type` | `webgl` | ttyd/xterm.js renderer: `webgl`, `canvas`, or `dom` |
+| `ttyd_font_size` | `0` | Browser font size in px; `0` keeps ttyd's built-in default |
+| `ttyd_cursor_style` | `block` | Cursor shape: `block`, `underline`, or `bar` |
+| `ttyd_theme` | `default` | ttyd theme preset: `default`, `light`, `green`, `amber`, or `high-contrast` |
+| `ttyd_leave_alert` | `true` | Show ttyd's "leave page" confirmation when closing the browser tab |
+| `ttyd_resize_overlay` | `true` | Show ttyd's resize overlay when the browser terminal changes size |
 | `raw_tcp` | `false` | Bind serial TCP to loopback; `true` binds all container IPv4 interfaces |
 | `ssl` | `false` | Enable native HTTPS/WSS in ttyd |
 | `certfile` | `fullchain.pem` | Certificate filename directly inside HA's `/ssl` directory |
@@ -36,6 +44,14 @@ flow_control: none
 username: console
 password: ""
 max_clients: 1
+ttyd_title: Server serial console
+ttyd_terminal_type: xterm-256color
+ttyd_renderer_type: webgl
+ttyd_font_size: 0
+ttyd_cursor_style: block
+ttyd_theme: default
+ttyd_leave_alert: true
+ttyd_resize_overlay: true
 raw_tcp: false
 ssl: false
 certfile: fullchain.pem
@@ -44,6 +60,17 @@ keyfile: privkey.pem
 
 Restart after saving. Internal ports remain 7681 and 2000; change external port
 numbers using the app's **Network** settings, not the serial options.
+The ttyd command itself stays fixed: these options only tune browser presentation,
+reported terminal metadata, and ttyd's built-in UI behaviors.
+
+Theme presets intentionally map to fixed color palettes instead of allowing
+arbitrary JSON or command fragments:
+
+- `default`: ttyd/xterm.js upstream defaults
+- `light`: light background with dark text
+- `green`: classic green-screen styling
+- `amber`: amber-on-dark terminal styling
+- `high-contrast`: black background with high-contrast white text
 
 ## TLS and authentication
 

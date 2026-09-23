@@ -14,7 +14,7 @@ RUN chmod 0755 /app/run.sh
 LABEL io.hass.name="Serial Console" \
       io.hass.description="ser2net serial console with authenticated ttyd" \
       io.hass.type="addon" \
-      io.hass.version="1.0.0" \
+      io.hass.version="1.1.0" \
       org.opencontainers.image.title="Serial Console" \
       org.opencontainers.image.licenses="MIT"
 
